@@ -608,11 +608,12 @@ extension Ghostty {
         }
 
         private func localEventLeftMouseDown(_ event: NSEvent) -> NSEvent? {
-            let isCommandPaletteVisible = (event.window?.windowController as? BaseTerminalController)?
-                .commandPaletteIsShowing == true
-            guard !isCommandPaletteVisible else {
+            let controller = event.window?.windowController as? BaseTerminalController
+            let isOverlayVisible = controller?.commandPaletteIsShowing == true ||
+                controller?.aiCommandPromptIsShowing == true
+            guard !isOverlayVisible else {
                 // We don't want to process events that
-                // are supposed to be handled by CommandPaletteView
+                // are supposed to be handled by overlay views.
                 return event
             }
 
@@ -977,6 +978,7 @@ extension Ghostty {
             if let window,
                let controller = window.windowController as? BaseTerminalController,
                !controller.commandPaletteIsShowing,
+               !controller.aiCommandPromptIsShowing,
                window.isKeyWindow &&
                     !self.focused &&
                     controller.focusFollowsMouse {

@@ -278,3 +278,17 @@ test "ghostty_config_trigger: default keybind" {
         try testing.expectEqual(.unidentified, trigger.key.physical);
     }
 }
+
+test "ghostty_config_trigger: toggle_ai_command_prompt default keybind" {
+    if (comptime !builtin.target.os.tag.isDarwin()) return;
+
+    const testing = std.testing;
+
+    var cfg = try Config.default(testing.allocator);
+    defer cfg.deinit();
+
+    const trigger = try config_trigger_(&cfg, "toggle_ai_command_prompt");
+    try testing.expectEqual(.unicode, trigger.tag);
+    try testing.expectEqual(@as(u32, 'k'), trigger.key.unicode);
+    try testing.expectEqual((inputpkg.Mods{ .super = true }).cval(), trigger.mods);
+}

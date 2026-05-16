@@ -6942,8 +6942,8 @@ pub const Keybinds = struct {
             try self.set.putFlags(
                 alloc,
                 .{ .key = .{ .unicode = 'k' }, .mods = .{ .super = true } },
-                .{ .clear_screen = {} },
-                .{ .performable = true },
+                .toggle_ai_command_prompt,
+                .{},
             );
             try self.set.put(
                 alloc,

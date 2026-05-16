@@ -245,5 +245,7 @@ struct ConfigTests {
         #expect(newWindow == .init("n", modifiers: [.command]))
         let gotoToNextSplit = try #require(config.keyboardShortcut(for: "goto_split:next"))
         #expect(gotoToNextSplit == .init("]", modifiers: [.command]))
+        let aiCommandPrompt = try #require(config.keyboardShortcut(for: "toggle_ai_command_prompt"))
+        #expect(aiCommandPrompt == .init("k", modifiers: [.command]))
     }
 }

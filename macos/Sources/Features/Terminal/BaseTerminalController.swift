@@ -48,6 +48,9 @@ class BaseTerminalController: NSWindowController,
     /// This can be set to show/hide the command palette.
     @Published var commandPaletteIsShowing: Bool = false
 
+    /// This can be set to show/hide the local AI command prompt.
+    @Published var aiCommandPromptIsShowing: Bool = false
+
     /// Set if the terminal view should show the update overlay.
     @Published var updateOverlayIsVisible: Bool = false
 
@@ -165,6 +168,11 @@ class BaseTerminalController: NSWindowController,
             self,
             selector: #selector(ghosttyCommandPaletteDidToggle(_:)),
             name: .ghosttyCommandPaletteDidToggle,
+            object: nil)
+        center.addObserver(
+            self,
+            selector: #selector(ghosttyAICommandPromptDidToggle(_:)),
+            name: .ghosttyAICommandPromptDidToggle,
             object: nil)
         center.addObserver(
             self,
@@ -573,6 +581,12 @@ class BaseTerminalController: NSWindowController,
         guard let surfaceView = notification.object as? Ghostty.SurfaceView else { return }
         guard surfaceTree.contains(surfaceView) else { return }
         toggleCommandPalette(nil)
+    }
+
+    @objc private func ghosttyAICommandPromptDidToggle(_ notification: Notification) {
+        guard let surfaceView = notification.object as? Ghostty.SurfaceView else { return }
+        guard surfaceTree.contains(surfaceView) else { return }
+        toggleAICommandPrompt(nil)
     }
 
     @objc private func ghosttyMaximizeDidToggle(_ notification: Notification) {
@@ -1397,6 +1411,8 @@ class BaseTerminalController: NSWindowController,
     @IBAction func toggleCommandPalette(_ sender: Any?) {
         commandPaletteIsShowing.toggle()
         if commandPaletteIsShowing {
+            aiCommandPromptIsShowing = false
+
             // Fix the incorrect focus when toggling from InlineTitleEditor
             // When toggling the command palette from the inline title editor,
             // the first responder state of the surface is changed quickly from true to false.
@@ -1409,6 +1425,14 @@ class BaseTerminalController: NSWindowController,
             // Since `performKeyEquivalent(with:)` is called on all of the subviews
             // until one of the return `true` so the paste action is consumed by the surface
             // instead of the first responder (command palette).
+            _ = focusedSurface?.resignFirstResponder()
+        }
+    }
+
+    @IBAction func toggleAICommandPrompt(_ sender: Any?) {
+        aiCommandPromptIsShowing.toggle()
+        if aiCommandPromptIsShowing {
+            commandPaletteIsShowing = false
             _ = focusedSurface?.resignFirstResponder()
         }
     }

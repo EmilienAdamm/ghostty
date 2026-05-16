@@ -38,6 +38,96 @@ for smaller examples of using `libghostty` in C and Zig.
 
 For more details, see [About Ghostty](https://ghostty.org/docs/about).
 
+## Personal Fork Notes
+
+This fork keeps a small set of personal changes on top of Ghostty. The main
+addition is an AI command prompt integration wired into the terminal UI and the
+shared command/action plumbing, with accompanying macOS tests.
+
+On macOS, press `Cmd+K` inside a terminal window to open the AI command prompt.
+
+This fork is intended for personal use and sharing with friends. It is not meant
+to be pushed back to the upstream Ghostty repository.
+
+## Building This Fork
+
+### macOS app
+
+For day-to-day local testing, the macOS helper script builds the app with Xcode:
+
+```shell
+macos/build.nu --configuration Debug
+```
+
+That produces:
+
+```text
+macos/build/Debug/Ghostty.app
+```
+
+Debug builds intentionally show development/debug warnings and are slower. To
+build the app you actually want to use, build `ReleaseLocal`:
+
+```shell
+macos/build.nu --configuration ReleaseLocal
+```
+
+`macos/build.nu` requires Nushell (`nu`). If `nu` is not installed, either
+install it:
+
+```shell
+brew install nushell
+```
+
+or run the equivalent Xcode command directly:
+
+```shell
+env -i HOME="$HOME" PATH="/usr/bin:/bin:/usr/sbin:/sbin" xcodebuild \
+  -project macos/Ghostty.xcodeproj \
+  -scheme Ghostty \
+  -configuration ReleaseLocal \
+  SYMROOT="$PWD/macos/build" \
+  build
+```
+
+That produces:
+
+```text
+macos/build/ReleaseLocal/Ghostty.app
+```
+
+Open that app bundle instead of the Debug bundle. `ReleaseLocal` is the useful
+local release configuration: it uses release optimizations and local signing,
+without requiring the official Ghostty release setup.
+
+If files outside `macos/` changed, update the underlying Zig library before
+building the macOS app:
+
+```shell
+zig build -Doptimize=ReleaseFast -Demit-macos-app=false
+macos/build.nu --configuration ReleaseLocal
+```
+
+### Zig CLI / core build
+
+The default Zig build is Debug. For a release-style build, pass an optimize mode:
+
+```shell
+zig build -Doptimize=ReleaseFast
+```
+
+On macOS, if you only want to compile the Zig core and skip the `.app` bundle:
+
+```shell
+zig build -Doptimize=ReleaseFast -Demit-macos-app=false
+```
+
+Use targeted tests while working because the full suite can be slow:
+
+```shell
+zig build test -Dtest-filter=<test name>
+```
+
 ## Download
 
 See the [download page](https://ghostty.org/download) on the Ghostty website.

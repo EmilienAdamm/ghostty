@@ -793,6 +793,14 @@ pub const Action = union(enum) {
     /// version can be found by running `ghostty +version`.
     toggle_command_palette,
 
+    /// Toggle the local AI command prompt.
+    ///
+    /// This opens a prompt that asks a local model to turn a natural-language
+    /// request into a shell command for the focused terminal.
+    ///
+    /// Only implemented on macOS.
+    toggle_ai_command_prompt,
+
     /// Toggle the quick terminal.
     ///
     /// The quick terminal, also known as the "Quake-style" or drop-down
@@ -1397,6 +1405,7 @@ pub const Action = union(enum) {
             .toggle_secure_input,
             .toggle_mouse_reporting,
             .toggle_command_palette,
+            .toggle_ai_command_prompt,
             .toggle_background_opacity,
             .show_on_screen_keyboard,
             .reset_window_size,
@@ -3322,6 +3331,24 @@ test "parse: action no parameters" {
         try parseSingle("a=ignore"),
     );
     try testing.expectError(Error.InvalidFormat, parseSingle("a=ignore:A"));
+}
+
+test "toggle_ai_command_prompt action parses formats and is surface scoped" {
+    const testing = std.testing;
+
+    const binding = try parseSingle("super+k=toggle_ai_command_prompt");
+    try testing.expect(binding.action == .toggle_ai_command_prompt);
+    try testing.expectEqual(Action.Scope.surface, binding.action.scope());
+
+    var buf: [64]u8 = undefined;
+    var writer: std.Io.Writer = .fixed(&buf);
+    try binding.action.format(&writer);
+    try testing.expectEqualStrings("toggle_ai_command_prompt", writer.buffered());
+
+    try testing.expectError(
+        Error.InvalidFormat,
+        parseSingle("super+k=toggle_ai_command_prompt:now"),
+    );
 }
 
 test "parse: action with string" {
